@@ -1,0 +1,231 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Edit Profile - Kasi Hustle</title>
+    <link rel="stylesheet" href="style.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        /* Re-using styles from myprofile.html for forms */
+        main.container {
+            margin-top: 30px;
+            max-width: 600px; /* Constrain width for a form */
+        }
+        .form-container {
+            background-color: var(--surface-color);
+            padding: 30px;
+            border-radius: var(--border-radius);
+            border: 1px solid var(--border-color);
+            box-shadow: var(--shadow-sm);
+        }
+        .form-group {
+            margin-bottom: 20px;
+        }
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 500;
+            color: var(--text-color);
+        }
+        .form-group input[type="text"],
+        .form-group input[type="email"] {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid var(--border-color);
+            border-radius: var(--border-radius);
+            background: var(--background-color);
+            color: var(--text-color);
+            box-sizing: border-box; /* Important */
+            font-size: 1rem;
+        }
+        .form-group input[type="email"]:disabled {
+            background-color: #eee;
+            color: var(--text-light);
+            cursor: not-allowed;
+        }
+        .form-actions {
+            margin-top: 30px;
+        }
+        /* Message for success/error */
+        .form-message {
+            display: none;
+            padding: 12px;
+            border-radius: var(--border-radius);
+            margin-bottom: 20px;
+            font-weight: 500;
+        }
+        .form-message.success {
+            background-color: #d1fae5;
+            color: #065f46;
+            border: 1px solid #a7f3d0;
+        }
+        .form-message.error {
+            background-color: #fee2e2;
+            color: #991b1b;
+            border: 1px solid #fecaca;
+        }
+    </style>
+</head>
+<body class="profile-page">
+    
+    <nav class="navbar">
+        <div class="nav-container">
+            <div class="nav-logo"><h2><a href="index.html">Kasi Hustle</a></h2></div>
+            <div class="nav-menu">
+                <a href="myprofile.html" class="nav-link" style="display: flex; align-items: center; gap: 8px;">
+                    <i class="fas fa-arrow-left"></i>
+                    <span>Back to Profile</span>
+                </a>
+                <div id="auth-container" class="waiting-auth">
+                    <!-- auth-status.js will populate this -->
+                </div>
+                <button class="btn-theme theme-toggle" aria-label="Toggle theme"><i class="fa-solid fa-moon"></i></button>
+            </div>
+            <div class="hamburger"><span></span><span></span><span></span></div>
+        </div>
+    </nav>
+
+    <main class="container">
+        
+        <div class="form-container">
+            <h2>Edit Profile Details</h2>
+            <p style="color: var(--text-light); margin-top: -10px; margin-bottom: 25px;">
+                Changes saved here will be visible on your profile.
+            </p>
+
+            <!-- Form Message -->
+            <div id="form-message" class="form-message"></div>
+
+            <form id="edit-profile-form">
+                <div class="form-group">
+                    <label for="email">Email</label>
+                    <input type="email" id="email" disabled>
+                </div>
+                <div class="form-group">
+                    <label for="fullName">Full Name</label>
+                    <input type="text" id="fullName" placeholder="Enter your full name" required>
+                </div>
+                <div class="form-group">
+                    <label for="location">Location</label>
+                    <input type="text" id="location" placeholder="e.g., Soshanguve, Pretoria">
+                </div>
+                
+                <div class="form-actions">
+                    <button type="submit" id="save-btn" class="btn-primary" style="width: 100%;">
+                        Save Changes
+                    </button>
+                </div>
+            </form>
+        </div>
+        
+    </main>
+
+    <script src="theme.js"></script>
+    <script type="module" src="auth-status.js"></script> 
+    
+    <script type="module">
+    import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/12.4.0/firebase-auth.js";
+    import { doc, getDoc, updateDoc } from "https://www.gstatic.com/firebasejs/12.4.0/firebase-firestore.js";
+    import { auth, db } from './firebase-config.js';
+
+    // Form elements
+    const profileForm = document.getElementById('edit-profile-form');
+    const emailInput = document.getElementById('email');
+    const fullNameInput = document.getElementById('fullName');
+    const locationInput = document.getElementById('location');
+    const saveBtn = document.getElementById('save-btn');
+    const formMessage = document.getElementById('form-message');
+
+    let currentUserId = null;
+    let userDocRef = null;
+
+    // --- Load User Data ---
+    onAuthStateChanged(auth, async (user) => {
+        if (user) {
+            currentUserId = user.uid;
+            userDocRef = doc(db, "users", currentUserId);
+
+            try {
+                const userDocSnap = await getDoc(userDocRef);
+                if (userDocSnap.exists()) {
+                    const userData = userDocSnap.data();
+                    
+                    // Populate the form fields
+                    emailInput.value = userData.email || '';
+                    fullNameInput.value = userData.fullName || '';
+                    locationInput.value = userData.location || ''; // Load location
+
+                } else {
+                    console.error("User document not found!");
+                    showMessage("Could not load your profile data.", "error");
+                }
+            } catch (error) {
+                console.error("Error loading user data:", error);
+                showMessage("An error occurred while loading your data.", "error");
+            }
+
+        } else {
+            // If logged out, redirect to auth page
+            window.location.href = "auth.html";
+        }
+    });
+
+    // --- Save User Data ---
+    profileForm.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        if (!currentUserId) return;
+
+        const newFullName = fullNameInput.value.trim();
+        const newLocation = locationInput.value.trim();
+
+        if (newFullName === "") {
+            showMessage("Full Name cannot be empty.", "error");
+            return;
+        }
+
+        // Disable button and show loading
+        saveBtn.disabled = true;
+        saveBtn.textContent = 'Saving...';
+        hideMessage();
+
+        try {
+            // Update the document in Firestore
+            await updateDoc(userDocRef, {
+                fullName: newFullName,
+                location: newLocation // Save the new location
+            });
+
+            // Update localStorage for the nav bar
+            localStorage.setItem('userName', newFullName);
+            
+            // Dispatch event for nav bar to update name in real-time if open
+            window.dispatchEvent(new CustomEvent('storage:nameUpdate'));
+
+            showMessage("Profile updated successfully!", "success");
+
+        } catch (error) {
+            console.error("Error updating profile:", error);
+            showMessage("An error occurred. Please try again.", "error");
+        } finally {
+            // Re-enable button
+            saveBtn.disabled = false;
+            saveBtn.textContent = 'Save Changes';
+        }
+    });
+
+    // --- Message Helper Functions ---
+    function showMessage(message, type = "success") {
+        formMessage.textContent = message;
+        formMessage.className = `form-message ${type}`; // 'success' or 'error'
+        formMessage.style.display = 'block';
+    }
+
+    function hideMessage() {
+        formMessage.style.display = 'none';
+    }
+
+    </script>
+</body>
+</html>

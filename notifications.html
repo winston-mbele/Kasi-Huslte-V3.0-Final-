@@ -1,0 +1,349 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>My Notifications - Kasi Hustle</title>
+    <link rel="stylesheet" href="style.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        /* Specific Styles for the Notifications Page */
+
+        .notifications-page {
+            padding: 40px 0;
+            min-height: 80vh;
+        }
+
+        .notifications-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 30px;
+        }
+
+        .notifications-header h1 {
+            font-size: 2rem;
+            margin: 0;
+        }
+
+        /* Notification List and Tabs */
+        .tabs {
+            display: flex;
+            border-bottom: 2px solid var(--border-color);
+            margin-bottom: 20px;
+        }
+
+        .tab-btn {
+            background: none;
+            border: none;
+            padding: 15px 25px;
+            font-size: 1rem;
+            font-weight: 600;
+            color: var(--text-light);
+            cursor: pointer;
+            transition: color 0.3s, border-bottom 0.3s;
+            border-bottom: 3px solid transparent;
+        }
+
+        .tab-btn.active {
+            color: var(--primary-color);
+            border-bottom-color: var(--primary-color);
+        }
+
+        .notification-list {
+            background-color: var(--surface-color);
+            border-radius: var(--border-radius);
+            box-shadow: var(--shadow-sm);
+            overflow: hidden;
+        }
+
+        .notification-card {
+            display: flex;
+            align-items: center;
+            padding: 20px;
+            border-bottom: 1px solid var(--border-color);
+            transition: background-color 0.3s;
+            cursor: pointer; /* Make cards clickable */
+        }
+
+        .notification-card:last-child {
+            border-bottom: none;
+        }
+
+        .notification-card:hover {
+            background-color: var(--background-color);
+        }
+
+        /* Icon styling */
+        .notification-icon {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.1rem;
+            margin-right: 15px;
+            flex-shrink: 0;
+        }
+
+        /* UPDATED ICON STYLES */
+        .icon-message { background-color: #e0f2fe; color: #3b82f6; } /* Blue - For messages */
+        .icon-system { background-color: #f3e8ff; color: #a855f7; } /* Purple - For system/account */
+        .icon-reminder { background-color: #fef3c7; color: #f59e0b; } /* Yellow - For reminders/reviews */
+        .icon-archive { background-color: var(--background-color); color: var(--text-light); }
+
+
+        /* Content */
+        .notification-content {
+            flex-grow: 1;
+        }
+
+        .notification-content p {
+            margin: 0;
+            line-height: 1.4;
+            font-weight: 500;
+        }
+
+        .notification-content small {
+            display: block;
+            color: var(--text-light);
+            margin-top: 4px;
+            font-size: 0.85rem;
+        }
+
+        /* Status indicators (e.g., Unread dot) */
+        .notification-status {
+            width: 8px;
+            height: 8px;
+            background-color: var(--primary-color);
+            border-radius: 50%;
+            margin-left: 15px;
+            flex-shrink: 0;
+        }
+
+        .notification-card.read .notification-status {
+            background-color: transparent;
+        }
+
+        /* --- NEW: Empty State Style --- */
+        .empty-state-container {
+            display: none; /* Hidden by default */
+            text-align: center;
+            padding: 6rem 2rem; 
+            color: var(--text-light);
+            opacity: 0.7; 
+            border: 2px dashed var(--border-color);
+            border-radius: var(--border-radius);
+            background-color: var(--surface-color);
+        }
+        .empty-state-container .empty-icon {
+            font-size: 5rem; 
+            margin-bottom: 1.5rem;
+            display: block;
+        }
+        .empty-state-container h2 {
+            font-size: 1.5rem;
+            color: var(--text-color); 
+            margin-bottom: 0.5rem;
+        }
+        .empty-state-container p {
+            font-size: 1.1rem;
+            max-width: 400px;
+            margin: 0 auto;
+        }
+        /* --- END NEW STYLE --- */
+
+        /* Responsive */
+        @media (max-width: 600px) {
+            .notification-card {
+                padding: 15px;
+            }
+            .tab-btn {
+                padding: 10px 15px;
+                font-size: 0.9rem;
+            }
+            .notifications-header {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 15px;
+            }
+        }
+
+    </style>
+</head>
+<body>
+    <nav class="navbar">
+        <div class="nav-container">
+            <div class="nav-logo"><h2><a href="index.html">Kasi Hustle</a></h2></div>
+            <!-- **** MODIFICATION: Updated nav-menu content **** -->
+            <div class="nav-menu">
+                <a href="client-dashboard.html" class="nav-link" style="display: flex; align-items: center; gap: 8px;">
+                    <i class="fas fa-arrow-left"></i>
+                    <span>Back to Dashboard</span>
+                </a>
+                <div id="auth-container" class="waiting-auth"></div>
+                <button class="btn-theme theme-toggle" aria-label="Toggle theme"><i class="fa-solid fa-moon"></i></button>
+            </div>
+            <!-- **** END OF MODIFICATION **** -->
+            <div class="hamburger"><span></span><span></span><span></span></div>
+        </div>
+    </nav>
+
+    <main class="notifications-page">
+        <div class="container">
+            <div class="notifications-header">
+                <h1>Notifications</h1>
+                <a href="#" id="mark-all-read" class="btn-secondary">Mark All as Read</a>
+            </div>
+
+            <div class="tabs">
+                <button class="tab-btn active" data-view="inbox" id="inbox-tab">Inbox (4)</button>
+                <button class="tab-btn" data-view="archive" id="archive-tab">Archive</button>
+            </div>
+
+            <div id="inbox-view" class="notification-view">
+                <div class="notification-list">
+                    <!-- All static notifications removed -->
+                </div>
+                
+                <!-- NEW: Empty State for Inbox -->
+                <div class="empty-state-container" id="empty-inbox">
+                    <i class="fas fa-bell empty-icon"></i>
+                    <h2>All Caught Up!</h2>
+                    <p>You have no new notifications.</p>
+                </div>
+            </div>
+
+            <div id="archive-view" class="notification-view" style="display: none;">
+                <div class="notification-list">
+                    <!-- All static notifications removed -->
+                </div>
+
+                <!-- NEW: Empty State for Archive -->
+                <div class="empty-state-container" id="empty-archive">
+                    <i class="fas fa-box-archive empty-icon"></i>
+                    <h2>No Archived Items</h2>
+                    <p>Your archived notifications will appear here.</p>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <footer class="footer">
+        <div class="container"><div class="footer-bottom"><p>&copy; 2025 Kasi Hustle. All rights reserved.</p></div></div>
+    </footer>
+
+    <script src="theme.js"></script>
+    <script type="module" src="auth-status.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const inboxTab = document.getElementById('inbox-tab');
+            const archiveTab = document.getElementById('archive-tab');
+            const inboxView = document.getElementById('inbox-view');
+            const archiveView = document.getElementById('archive-view');
+            const markAllReadBtn = document.getElementById('mark-all-read');
+            
+            // --- UPDATED: Get list and empty state elements ---
+            const inboxList = inboxView.querySelector('.notification-list');
+            const archiveList = archiveView.querySelector('.notification-list');
+            const emptyInbox = document.getElementById('empty-inbox');
+            const emptyArchive = document.getElementById('empty-archive');
+            // --- END UPDATE ---
+
+            // --- NEW: Function to check list emptiness ---
+            function checkEmptyState(view) {
+                if (view === 'inbox') {
+                    const itemCount = inboxList.querySelectorAll('.notification-card').length;
+                    if (itemCount === 0) {
+                        inboxList.style.display = 'none';
+                        emptyInbox.style.display = 'block';
+                    } else {
+                        inboxList.style.display = 'block';
+                        emptyInbox.style.display = 'none';
+                    }
+                    // Update unread count for inbox
+                    const unreadCount = inboxList.querySelectorAll('.notification-card.unread').length;
+                    inboxTab.textContent = `Inbox (${unreadCount})`;
+                } else if (view === 'archive') {
+                    const itemCount = archiveList.querySelectorAll('.notification-card').length;
+                    if (itemCount === 0) {
+                        archiveList.style.display = 'none';
+                        emptyArchive.style.display = 'block';
+                    } else {
+                        archiveList.style.display = 'block';
+                        emptyArchive.style.display = 'none';
+                    }
+                }
+            }
+            // --- END NEW FUNCTION ---
+
+            function switchTab(targetView) {
+                document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
+                document.querySelectorAll('.notification-view').forEach(view => view.style.display = 'none');
+
+                if (targetView === 'inbox') {
+                    inboxTab.classList.add('active');
+                    inboxView.style.display = 'block';
+                } else if (targetView === 'archive') {
+                    archiveTab.classList.add('active');
+                    archiveView.style.display = 'block';
+                }
+                // Check empty state for the newly active view
+                checkEmptyState(targetView);
+            }
+
+            // --- DEPRECATED: updateUnreadCount function (merged into checkEmptyState) ---
+
+            inboxTab.addEventListener('click', () => switchTab('inbox'));
+            archiveTab.addEventListener('click', () => switchTab('archive'));
+
+            markAllReadBtn.addEventListener('click', (e) => {
+                e.preventDefault();
+                inboxList.querySelectorAll('.notification-card.unread').forEach(card => {
+                    card.classList.remove('unread');
+                    card.classList.add('read');
+                    const statusDot = card.querySelector('.notification-status');
+                    if (statusDot) {
+                        statusDot.style.backgroundColor = 'transparent';
+                    }
+                });
+                checkEmptyState('inbox'); // Re-check inbox state (count will be 0)
+            });
+
+            // Handle card clicks (mark as read and navigate)
+             inboxList.addEventListener('click', (e) => {
+                 const card = e.target.closest('.notification-card');
+                 if (!card) return; // Exit if click wasn't on a card or its child
+
+                 // Mark as read
+                 if (card.classList.contains('unread')) {
+                     card.classList.remove('unread');
+                     card.classList.add('read');
+                     const statusDot = card.querySelector('.notification-status');
+                     if (statusDot) {
+                          statusDot.style.backgroundColor = 'transparent';
+                     }
+                     checkEmptyState('inbox'); // Re-check inbox state
+                 }
+
+                 // Navigate if data-link attribute exists
+                 const link = card.dataset.link;
+                 if (link) {
+                     window.location.href = link;
+                 } else {
+                     console.log("Notification clicked, no link specified.");
+                 }
+             });
+
+             // --- UPDATED: Initial check on load ---
+             checkEmptyState('inbox'); // Check inbox on load
+             checkEmptyState('archive'); // Check archive on load
+             switchTab('inbox'); // Ensure the default tab view is correct
+
+        });
+    </script>
+</body>
+</html>
+

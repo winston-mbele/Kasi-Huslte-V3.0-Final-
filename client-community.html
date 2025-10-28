@@ -1,0 +1,691 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Community - Kasi Hustle</title>
+    
+    <!-- Links from your main site (style.css, Google Fonts, Font Awesome) -->
+    <link rel="stylesheet" href="style.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+
+    <!-- Dashboard-specific styles -->
+    <style>
+        /* Reset for this page */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        /* Use main site's font and background */
+        body {
+            font-family: var(--font-family);
+            background: var(--background-color);
+            color: var(--text-color);
+        }
+
+        .dashboard-container {
+            display: grid; 
+            grid-template-columns: 250px 1fr; 
+            min-height: 100vh;
+        }
+
+        .sidebar {
+            width: 250px; 
+            background: var(--surface-color);
+            border-right: 1px solid var(--border-color);
+            position: sticky; 
+            top: 0;
+            height: 100vh; 
+            overflow-y: auto;
+        }
+
+        .sidebar-header {
+            padding: 2rem 1rem;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .user-info {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .user-avatar {
+            width: 50px;
+            height: 50px;
+            background: var(--background-color); /* Fallback bg */
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: bold;
+            overflow: hidden; /* To contain the image */
+            cursor: pointer; 
+        }
+
+        .user-avatar img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+
+        .user-details h3 {
+            font-size: 1.1rem;
+            margin-bottom: 0.2rem;
+            word-break: break-word;
+        }
+
+        .user-details p {
+            color: var(--text-light); 
+            font-size: 0.9rem;
+        }
+
+        .nav-menu {
+            list-style: none;
+            padding: 1rem 0;
+        }
+
+        .sidebar .nav-menu {
+            display: flex;
+            flex-direction: column;
+            align-items: stretch; 
+            gap: 0; 
+        }
+
+        .nav-item {
+            margin-bottom: 0.5rem;
+        }
+
+        .nav-link {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            padding: 1rem;
+            color: var(--text-light); 
+            text-decoration: none;
+            transition: all 0.3s;
+            border-left: 3px solid transparent;
+        }
+
+        .nav-link.active {
+            color: var(--text-color);
+            font-weight: 600;
+        }
+
+
+        .main-content {
+            flex: 1;
+            padding: 2rem;
+            /* Added for chat layout */
+            display: flex;
+            flex-direction: column;
+            max-height: 100vh;
+            overflow: hidden;
+        }
+
+        .header {
+            background: var(--surface-color);
+            padding: 1.5rem 2rem;
+            border-radius: var(--border-radius);
+            box-shadow: var(--shadow-sm);
+            border: 1px solid var(--border-color);
+            margin-bottom: 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            /* Make header static, not part of scroll */
+            flex-shrink: 0;
+        }
+
+        .header h1 {
+            color: var(--text-color);
+            font-size: 2rem;
+        }
+
+        .header-actions {
+            display: flex;
+            gap: 1rem;
+            align-items: center;
+        }
+
+        .search-bar {
+            display: flex;
+            align-items: center;
+            background: var(--background-color); 
+            border-radius: 25px;
+            padding: 0.5rem 1rem;
+            width: 300px;
+            border: 1px solid var(--border-color);
+        }
+
+        .search-bar input {
+            border: none;
+            background: none;
+            outline: none;
+            flex: 1;
+            padding: 0.5rem;
+            color: var(--text-color); 
+        }
+
+        .notification-btn {
+            position: relative;
+            background: none;
+            border: none;
+            font-size: 1.2rem;
+            color: var(--text-light); 
+            cursor: pointer;
+            text-decoration: none;
+            display: inline-block;
+            padding: 4px;
+        }
+        .notification-btn:hover {
+            color: var(--text-color);
+        }
+
+        .notification-badge {
+            position: absolute;
+            top: -5px;
+            right: -5px;
+            background: var(--primary-color); 
+            color: white;
+            border-radius: 50%;
+            width: 20px;
+            height: 20px;
+            font-size: 0.8rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        /* NEW: Community Chat Styles */
+        .community-chat-container {
+            max-width: 900px; /* Wider for community */
+            width: 100%;
+            margin: 0 auto; /* Centered */
+            background: var(--surface-color);
+            border: 1px solid var(--border-color);
+            border-radius: var(--border-radius);
+            box-shadow: var(--shadow-sm);
+            display: flex;
+            flex-direction: column;
+            /* Make chat container fill remaining space */
+            flex: 1; 
+            min-height: 0; /* Fix for flex overflow */
+        }
+
+        #community-chat-messages {
+            flex: 1;
+            overflow-y: auto;
+            padding: 1.5rem;
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+        }
+
+        .chat-message {
+            padding: 0.75rem 1rem;
+            border-radius: var(--border-radius);
+            max-width: 70%;
+            word-wrap: break-word;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .message-sender {
+            font-weight: 600;
+            font-size: 0.9rem;
+            margin-bottom: 0.25rem;
+            color: var(--primary-color);
+        }
+
+        .message-text {
+            font-size: 1rem;
+        }
+
+        .message-timestamp {
+            font-size: 0.75rem;
+            color: var(--text-light);
+            margin-top: 0.25rem;
+            align-self: flex-end; /* Timestamp to the right */
+        }
+
+        .my-message {
+            background: var(--primary-color);
+            color: white;
+            align-self: flex-end;
+            border-radius: 15px 15px 0 15px;
+        }
+
+        .my-message .message-sender {
+            color: white; /* Name is white on own message */
+        }
+         .my-message .message-timestamp {
+            color: rgba(255, 255, 255, 0.7);
+        }
+
+        .other-message {
+            background: var(--background-color);
+            border: 1px solid var(--border-color);
+            align-self: flex-start;
+            border-radius: 15px 15px 15px 0;
+        }
+
+        #community-message-form {
+            display: flex;
+            padding: 1rem;
+            border-top: 1px solid var(--border-color);
+            gap: 1rem;
+            background: var(--surface-color);
+            border-radius: 0 0 var(--border-radius) var(--border-radius);
+        }
+
+        #community-message-input {
+            flex: 1;
+            padding: 0.75rem 1.25rem;
+            border-radius: 20px;
+            border: 1px solid var(--border-color);
+            background: var(--background-color);
+            color: var(--text-color);
+            outline: none;
+            font-size: 1rem;
+        }
+
+        #community-message-input:focus {
+            border-color: var(--primary-color);
+        }
+
+        #community-send-btn {
+            background: var(--primary-color);
+            color: white;
+            border: none;
+            border-radius: 50%;
+            width: 45px;
+            height: 45px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.2rem;
+            cursor: pointer;
+            transition: background 0.3s;
+            flex-shrink: 0;
+        }
+
+        #community-send-btn:hover {
+            background: var(--primary-dark);
+        }
+
+        #community-send-btn:disabled {
+            background: var(--text-light);
+            cursor: not-allowed;
+        }
+        /* END NEW STYLES */
+
+
+        @media (max-width: 768px) {
+            .dashboard-container {
+                grid-template-columns: 1fr; 
+            }
+
+            .sidebar {
+                transform: translateX(-100%);
+                transition: transform 0.3s;
+                z-index: 2000; 
+                grid-row: 1; 
+                grid-column: 1; 
+            }
+
+            .sidebar.open {
+                transform: translateX(0);
+            }
+
+            .main-content {
+                padding: 1rem;
+                grid-row: 1; 
+                grid-column: 1; 
+                max-height: none; /* Allow full height on mobile */
+            }
+
+            .header {
+                flex-wrap: wrap; 
+                gap: 1rem;
+                margin-bottom: 1rem;
+            }
+
+            .search-bar {
+                width: 100%;
+                order: 3; 
+            }
+
+            .community-chat-container {
+                height: 75vh; /* Adjust height for mobile */
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="dashboard-container">
+        <!-- Sidebar -->
+        <nav class="sidebar">
+            <div class="sidebar-header">
+                <div class="user-info">
+                    <a href="myprofile.html" title="View Profile" style="text-decoration: none;">
+                        <div class="user-avatar" id="sidebarUserAvatar">
+                            <img src="default-profile-picture.png" alt="User Avatar" id="sidebarUserAvatarImg" onerror="this.src='default-profile-picture.png';">
+                        </div>
+                    </a>
+                    <div class="user-details">
+                        <h3 id="sidebarUserName">Loading...</h3>
+                        <p id="sidebarUserRole">Client</p>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- UPDATED: Sidebar Links -->
+            <ul class="nav-menu">
+                <li class="nav-item">
+                    <a href="client-dashboard.html" class="nav-link" data-section="home">
+                        <i class="fas fa-home"></i>
+                        <span>Home</span>
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a href="client-find-providers.html" class="nav-link" data-section="find-providers">
+                        <i class="fas fa-search"></i>
+                        <span>Find Providers</span>
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a href="client-chat.html" class="nav-link" data-section="chat">
+                        <i class="fas fa-comments"></i>
+                        <span>Chat</span>
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a href="client-bookings.html" class="nav-link" data-section="bookings">
+                        <i class="fas fa-calendar"></i>
+                        <span>Bookings</span>
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a href="client-payments.html" class="nav-link" data-section="payments">
+                        <i class="fas fa-credit-card"></i>
+                        <span>Payments</span>
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <!-- This is the active page -->
+                    <a href="client-community.html" class="nav-link active" data-section="community">
+                        <i class="fas fa-users"></i>
+                        <span>Community</span>
+                    </a>
+                </li>
+                <li class="nav-item" style="margin-top: 2rem; border-top: 1px solid var(--border-color); padding-top: 1rem;">
+                    <a href="index.html" class="nav-link">
+                        <i class="fas fa-arrow-left"></i>
+                        <span>Back to Kasi Hustle</span>
+                    </a>
+                </li>
+            </ul>
+        </nav>
+
+        <!-- Main Content -->
+        <main class="main-content">
+            <div class="header">
+                <h1 id="pageTitle">Community Hub</h1>
+                <div class="header-actions">
+                    <div class="search-bar">
+                        <i class="fas fa-search"></i>
+                        <input type="text" placeholder="Search community..." id="dashboard-search-input">
+                    </div>
+                    <a href="notifications.html" class="notification-btn">
+                        <i class="fas fa-bell"></i>
+                        <span class="notification-badge">3</span>
+                    </a>
+                    <button class="btn-theme theme-toggle" aria-label="Toggle theme" style="font-size: 1.2rem; padding: 8px;">
+                        <i class="fa-solid fa-moon"></i>
+                    </button>
+                </div>
+            </div>
+
+            <!-- UPDATED: Replaced empty state with chat container -->
+            <div class="community-chat-container">
+                <div id="community-chat-messages">
+                    <!-- Messages will be loaded here -->
+                    <p style="text-align: center; color: var(--text-light);">Loading community messages...</p>
+                </div>
+                <form id="community-message-form">
+                    <input type="text" id="community-message-input" placeholder="Type your message..." autocomplete="off">
+                    <button type="submit" id="community-send-btn" aria-label="Send Message">
+                        <i class="fas fa-paper-plane"></i>
+                    </button>
+                </form>
+            </div>
+            
+        </main>
+    </div>
+
+    <!-- This page's specific navigation JS -->
+    <script>
+        // Theme Toggle
+        function initThemeToggle() {
+            const themeToggle = document.querySelector('.theme-toggle');
+            if (themeToggle) {
+                if (localStorage.getItem('theme') === 'dark') {
+                    document.body.classList.add('dark-mode');
+                    themeToggle.innerHTML = '<i class="fa-solid fa-sun"></i>';
+                }
+                themeToggle.addEventListener('click', () => {
+                    document.body.classList.toggle('dark-mode');
+                    let theme = 'light';
+                    if (document.body.classList.contains('dark-mode')) {
+                        theme = 'dark';
+                        themeToggle.innerHTML = '<i class="fa-solid fa-sun"></i>';
+                    } else {
+                        themeToggle.innerHTML = '<i class="fa-solid fa-moon"></i>';
+                    }
+                    localStorage.setItem('theme', theme);
+                });
+            }
+        }
+
+        // Dashboard Search
+        function initDashboardSearch() {
+            const searchInput = document.querySelector('#dashboard-search-input');
+            if (!searchInput) return;
+            const performSearch = () => {
+                const term = searchInput.value.trim();
+                // Community search might be different, but for now, redirects to services
+                const loc = ''; 
+                window.location.href = `all-services.html?q=${encodeURIComponent(term)}&loc=${encodeURIComponent(loc)}`;
+            };
+            searchInput.addEventListener('keypress', (e) => {
+                if (e.key === 'Enter') {
+                    performSearch();
+                }
+            });
+        }
+
+        // Run all scripts on page load
+        document.addEventListener('DOMContentLoaded', () => {
+            initThemeToggle();
+            initDashboardSearch();
+            
+            // Mobile sidebar toggle
+            function toggleSidebar() {
+                document.querySelector('.sidebar').classList.toggle('open');
+            }
+
+            if (window.innerWidth <= 768) {
+                const header = document.querySelector('.header');
+                const menuBtn = document.createElement('button');
+                menuBtn.innerHTML = '<i class="fas fa-bars"></i>';
+                menuBtn.style.cssText = 'background: none; border: none; font-size: 1.2rem; cursor: pointer;';
+                menuBtn.onclick = toggleSidebar;
+                // Insert it before the first child (the h1)
+                header.insertBefore(menuBtn, header.firstChild);
+            }
+        });
+    </script>
+
+    <!-- Firebase Auth, Profile Loader, and NEW Community Chat Logic -->
+    <script type="module">
+        import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/12.4.0/firebase-auth.js";
+        // UPDATED: Import all necessary Firestore functions
+        import { 
+            doc, getDoc, collection, addDoc, 
+            serverTimestamp, query, onSnapshot, orderBy 
+        } from "https://www.gstatic.com/firebasejs/12.4.0/firebase-firestore.js";
+        import { auth, db } from './firebase-config.js';
+
+        document.addEventListener('DOMContentLoaded', () => {
+            onAuthStateChanged(auth, async (user) => {
+                if (user) {
+                    // --- Standard Profile Loader ---
+                    const userId = user.uid;
+                    const avatarImg = document.getElementById('sidebarUserAvatarImg');
+                    const userNameEl = document.getElementById('sidebarUserName');
+                    const userRoleEl = document.getElementById('sidebarUserRole');
+                    let userName = localStorage.getItem('userName');
+                    let userRole = localStorage.getItem('userRole');
+                    let profileImageSrc = localStorage.getItem(`userProfileImage_${userId}`);
+
+                    if (!userName || !userRole) {
+                        try {
+                            const userDocRef = doc(db, "users", userId);
+                            const userDocSnap = await getDoc(userDocRef);
+                            if (userDocSnap.exists()) {
+                                const data = userDocSnap.data();
+                                userName = data.fullName || 'Kasi User';
+                                userRole = data.role || 'Personal';
+                                localStorage.setItem('userName', userName);
+                                localStorage.setItem('userRole', userRole);
+                            } else {
+                                userName = 'Kasi User';
+                                userRole = 'Personal';
+                            }
+                        } catch (error) {
+                            console.error("Error fetching user data for dashboard:", error);
+                            userName = 'Kasi User';
+                            userRole = 'Personal';
+                        }
+                    }
+
+                    if (userNameEl) userNameEl.textContent = userName;
+                    if (userRoleEl) userRoleEl.textContent = userRole === 'Personal' ? 'Client' : userRole;
+                    if (avatarImg) avatarImg.src = profileImageSrc || 'default-profile-picture.png';
+                    // --- End Profile Loader ---
+
+
+                    // --- NEW: Community Chat Logic ---
+                    const chatMessages = document.getElementById('community-chat-messages');
+                    const messageForm = document.getElementById('community-message-form');
+                    const messageInput = document.getElementById('community-message-input');
+                    const sendButton = document.getElementById('community-send-btn');
+
+                    // Check if all chat elements exist on this page
+                    if (chatMessages && messageForm && messageInput && sendButton) {
+                        const currentUserId = user.uid;
+                        // Use the 'userName' variable fetched above
+                        const currentUserName = userName || 'Kasi User'; 
+
+                        // 1. Load Messages
+                        const messagesCollection = collection(db, "community-chat");
+                        // Query to get messages and order them by timestamp
+                        const q = query(messagesCollection, orderBy("timestamp"));
+
+                        const unsubscribe = onSnapshot(q, (querySnapshot) => {
+                            if (querySnapshot.empty) {
+                                chatMessages.innerHTML = '<p style="text-align: center; color: var(--text-light);">No messages yet. Be the first to say hi!</p>';
+                                return;
+                            }
+                            
+                            chatMessages.innerHTML = ''; // Clear loading/previous messages
+                            querySnapshot.forEach((doc) => {
+                                const message = doc.data();
+                                const messageEl = document.createElement('div');
+                                messageEl.classList.add('chat-message');
+
+                                // Sanitize text content
+                                const senderName = document.createTextNode(message.senderName || 'Anonymous');
+                                const messageText = document.createTextNode(message.text || '');
+                                
+                                let timestampStr = '';
+                                if (message.timestamp && message.timestamp.seconds) {
+                                    timestampStr = new Date(message.timestamp.seconds * 1000).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+                                }
+
+                                // Create elements and append text nodes to prevent XSS
+                                const senderEl = document.createElement('div');
+                                senderEl.classList.add('message-sender');
+                                senderEl.appendChild(senderName);
+
+                                const textEl = document.createElement('div');
+                                textEl.classList.add('message-text');
+                                textEl.appendChild(messageText);
+
+                                const timeEl = document.createElement('div');
+                                timeEl.classList.add('message-timestamp');
+                                timeEl.textContent = timestampStr;
+
+                                messageEl.appendChild(senderEl);
+                                messageEl.appendChild(textEl);
+                                messageEl.appendChild(timeEl);
+
+                                if (message.senderId === currentUserId) {
+                                    messageEl.classList.add('my-message');
+                                } else {
+                                    messageEl.classList.add('other-message');
+
+                                }
+                                chatMessages.appendChild(messageEl);
+                            });
+                            // Scroll to bottom
+                            chatMessages.scrollTop = chatMessages.scrollHeight;
+                        }, (error) => {
+                            console.error("Error loading community messages: ", error);
+                            chatMessages.innerHTML = '<p style="text-align: center; color: var(--text-light);">Error loading messages. Check console.</p>';
+                        });
+
+                        // 2. Send Message
+                        messageForm.addEventListener('submit', async (e) => {
+                            e.preventDefault();
+                            const text = messageInput.value.trim();
+                            if (text === '') return; // Don't send empty messages
+
+                            sendButton.disabled = true; // Disable button
+                            messageInput.disabled = true;
+
+                            try {
+                                // Add the new message to Firestore
+                                await addDoc(messagesCollection, {
+                                    text: text,
+                                    senderId: currentUserId,
+                                    senderName: currentUserName,
+                                    timestamp: serverTimestamp() // Get server time
+                                });
+                                messageInput.value = ''; // Clear input
+                            } catch (error) {
+                                console.error("Error sending message: ", error);
+                            } finally {
+                                sendButton.disabled = false; // Re-enable
+                                messageInput.disabled = false;
+                                messageInput.focus(); // Set focus back to input
+                            }
+                        });
+                    }
+                    // --- End Community Chat Logic ---
+
+                } else {
+                    // User is signed out. Redirect to login.
+                    window.location.href = 'auth.html';
+                }
+            });
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,691 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard Home - Kasi Hustle</title>
+    
+    <link rel="stylesheet" href="style.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+
+    <style>
+        /* Reset for this page */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        /* Use main site's font and background */
+        body {
+            font-family: var(--font-family);
+            background: var(--background-color);
+            color: var(--text-color);
+        }
+
+        .dashboard-container {
+            display: grid; 
+            grid-template-columns: 250px 1fr; 
+            min-height: 100vh;
+        }
+
+        .sidebar {
+            width: 250px; 
+            background: var(--surface-color);
+            border-right: 1px solid var(--border-color);
+            position: sticky; 
+            top: 0;
+            height: 100vh; 
+            overflow-y: auto;
+        }
+
+        .sidebar-header {
+            padding: 2rem 1rem;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .user-info {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .user-avatar {
+            width: 50px;
+            height: 50px;
+            background: var(--background-color); /* Fallback bg */
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: bold;
+            overflow: hidden; /* To contain the image */
+            cursor: pointer; 
+        }
+
+        .user-avatar img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+
+        .user-details h3 {
+            font-size: 1.1rem;
+            margin-bottom: 0.2rem;
+            word-break: break-word;
+        }
+
+        .user-details p {
+            color: var(--text-light); 
+            font-size: 0.9rem;
+        }
+
+        .nav-menu {
+            list-style: none;
+            padding: 1rem 0;
+        }
+
+        .sidebar .nav-menu {
+            display: flex;
+            flex-direction: column;
+            align-items: stretch; 
+            gap: 0; 
+        }
+
+        .nav-item {
+            margin-bottom: 0.5rem;
+        }
+
+        .nav-link {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            padding: 1rem;
+            color: var(--text-light); 
+            text-decoration: none;
+            transition: all 0.3s;
+            border-left: 3px solid transparent;
+        }
+
+        .nav-link.active {
+            color: var(--text-color);
+            font-weight: 600;
+        }
+
+
+        .main-content {
+            flex: 1;
+            padding: 2rem;
+        }
+
+        .header {
+            background: var(--surface-color);
+            padding: 1.5rem 2rem;
+            border-radius: var(--border-radius);
+            box-shadow: var(--shadow-sm);
+            border: 1px solid var(--border-color);
+            margin-bottom: 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .header h1 {
+            color: var(--text-color);
+            font-size: 2rem;
+        }
+
+        .header-actions {
+            display: flex;
+            gap: 1rem;
+            align-items: center;
+        }
+
+        .search-bar {
+            display: flex;
+            align-items: center;
+            background: var(--background-color); 
+            border-radius: 25px;
+            padding: 0.5rem 1rem;
+            width: 300px;
+            border: 1px solid var(--border-color);
+        }
+
+        .search-bar input {
+            border: none;
+            background: none;
+            outline: none;
+            flex: 1;
+            padding: 0.5rem;
+            color: var(--text-color); 
+        }
+
+        .notification-btn {
+            position: relative;
+            background: none;
+            border: none;
+            font-size: 1.2rem;
+            color: var(--text-light); 
+            cursor: pointer;
+            text-decoration: none;
+            display: inline-block;
+            padding: 4px;
+        }
+        .notification-btn:hover {
+            color: var(--text-color);
+        }
+
+        .notification-badge {
+            position: absolute;
+            top: -5px;
+            right: -5px;
+            background: var(--primary-color); 
+            color: white;
+            border-radius: 50%;
+            width: 20px;
+            height: 20px;
+            font-size: 0.8rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        /* content-section rules are no longer needed as we're not hiding/showing */
+
+        .widgets-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 2rem;
+            margin-bottom: 2rem;
+        }
+
+        .widget {
+            background: var(--surface-color);
+            border-radius: var(--border-radius);
+            padding: 1.5rem;
+            box-shadow: var(--shadow-sm);
+            border: 1px solid var(--border-color);
+        }
+
+        .widget-title {
+            font-size: 1.2rem;
+            font-weight: 600;
+            color: var(--text-color);
+        }
+
+        .widget-icon {
+            width: 40px;
+            height: 40px;
+            background: var(--primary-color); 
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            margin-bottom: 1rem;
+        }
+
+        .provider-card {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            padding: 1rem;
+            border: 1px solid var(--border-color);
+            border-radius: var(--border-radius);
+            margin-bottom: 1rem;
+            transition: all 0.3s;
+        }
+
+        .provider-card:hover {
+            border-color: var(--primary-color); 
+            transform: translateY(-2px);
+        }
+
+        .provider-avatar {
+            width: 50px;
+            height: 50px;
+            background: var(--primary-color); 
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: bold;
+        }
+
+        .provider-info h4 {
+            margin-bottom: 0.2rem;
+        }
+
+        .provider-info p {
+            color: var(--text-light);
+            font-size: 0.9rem;
+        }
+
+        .provider-rating {
+            display: flex;
+            align-items: center;
+            gap: 0.3rem;
+            margin-top: 0.5rem;
+        }
+
+        .stars {
+            color: #facc15; 
+        }
+
+        .job-card {
+            background: var(--background-color); 
+            border-radius: var(--border-radius);
+            padding: 1rem;
+            margin-bottom: 1rem;
+            border-left: 4px solid var(--primary-color); 
+        }
+
+        .job-status {
+            display: inline-block;
+            padding: 0.3rem 0.8rem;
+            border-radius: 15px;
+            font-size: 0.8rem;
+            font-weight: 600;
+        }
+        
+        .status-active {
+            background: #d1fae5; 
+            color: #059669;
+        }
+
+        .status-completed {
+            background: #cce5ff;
+            color: #004085;
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1rem;
+            margin-bottom: 2rem;
+        }
+
+        .stat-card {
+            background: var(--surface-color);
+            border-radius: var(--border-radius);
+            padding: 1.5rem;
+            text-align: center;
+            box-shadow: var(--shadow-sm);
+            border: 1px solid var(--border-color);
+        }
+
+        .stat-number {
+            font-size: 2rem;
+            font-weight: bold;
+            color: var(--primary-color); 
+            margin-bottom: 0.5rem;
+        }
+
+        .stat-label {
+            color: var(--text-light);
+            font-size: 0.9rem;
+        }
+
+        /* NEW: Style for empty state placeholders */
+        .empty-state-container {
+            text-align: center;
+            padding: 6rem 2rem; /* Lots of padding to center it vertically */
+            color: var(--text-light);
+            opacity: 0.7; /* Make it faint */
+        }
+        .empty-state-container .empty-icon {
+            font-size: 5rem; /* Big icon */
+            margin-bottom: 1.5rem;
+            display: block;
+        }
+        .empty-state-container h2 {
+            font-size: 1.5rem;
+            color: var(--text-color); /* Header can be a bit darker */
+            margin-bottom: 0.5rem;
+        }
+        .empty-state-container p {
+            font-size: 1.1rem;
+            max-width: 400px;
+            margin: 0 auto;
+        }
+        /* END NEW STYLE */
+
+        @media (max-width: 768px) {
+            .dashboard-container {
+                grid-template-columns: 1fr; 
+            }
+
+            .sidebar {
+                transform: translateX(-100%);
+                transition: transform 0.3s;
+                z-index: 2000; 
+                grid-row: 1; 
+                grid-column: 1; 
+            }
+
+            .sidebar.open {
+                transform: translateX(0);
+            }
+
+            .main-content {
+                padding: 1rem;
+                grid-row: 1; 
+                grid-column: 1; 
+            }
+
+            .header {
+                flex-wrap: wrap; 
+                gap: 1rem;
+            }
+
+            .search-bar {
+                width: 100%;
+                order: 3; 
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="dashboard-container">
+        <nav class="sidebar">
+            <div class="sidebar-header">
+                <div class="user-info">
+                    <a href="myprofile.html" title="View Profile" style="text-decoration: none;">
+                        <div class="user-avatar" id="sidebarUserAvatar">
+                            <img src="default-profile-picture.png" alt="User Avatar" id="sidebarUserAvatarImg" onerror="this.src='default-profile-picture.png';">
+                        </div>
+                    </a>
+                    <div class="user-details">
+                        <h3 id="sidebarUserName">Loading...</h3>
+                        <p id="sidebarUserRole">Client</p>
+                    </div>
+                </div>
+            </div>
+            
+            <ul class="nav-menu">
+                <li class="nav-item">
+                    <a href="client-dashboard.html" class="nav-link active" data-section="home">
+                        <i class="fas fa-home"></i>
+                        <span>Home</span>
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a href="client-find-providers.html" class="nav-link" data-section="find-providers">
+                        <i class="fas fa-search"></i>
+                        <span>Find Providers</span>
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a href="client-chat.html" class="nav-link" data-section="chat">
+                        <i class="fas fa-comments"></i>
+                        <span>Chat</span>
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a href="client-bookings.html" class="nav-link" data-section="bookings">
+                        <i class="fas fa-calendar"></i>
+                        <span>Bookings</span>
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a href="client-payments.html" class="nav-link" data-section="payments">
+                        <i class="fas fa-credit-card"></i>
+                        <span>Payments</span>
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a href="client-community.html" class="nav-link" data-section="community">
+                        <i class="fas fa-users"></i>
+                        <span>Community</span>
+                    </a>
+                </li>
+                <li class="nav-item" style="margin-top: 2rem; border-top: 1px solid var(--border-color); padding-top: 1rem;">
+                </li>
+            </ul>
+        </nav>
+
+        <main class="main-content">
+            <div class="header">
+                <h1 id="pageTitle">Dashboard Overview</h1>
+                <div class="header-actions">
+                    <div class="search-bar">
+                        <i class="fas fa-search"></i>
+                        <input type="text" placeholder="Search services..." id="dashboard-search-input">
+                    </div>
+                    <a href="notifications.html" class="notification-btn">
+                        <i class="fas fa-bell"></i>
+                        <span class="notification-badge">0</span>
+                    </a>
+                    <button class="btn-theme theme-toggle" aria-label="Toggle theme" style="font-size: 1.2rem; padding: 8px;">
+                        <i class="fa-solid fa-moon"></i>
+                    </button>
+                </div>
+            </div>
+
+            <div class="content-section active" id="home">
+                <div class="stats-grid">
+                    <div class="stat-card">
+                        <div class="stat-number">0</div>
+                        <div class="stat-label">Services Used</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-number">0.0</div>
+                        <div class="stat-label">Average Rating</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-number">R0</div>
+                        <div class="stat-label">Total Spent</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-number">0</div>
+                        <div class="stat-label">Active Bookings</div>
+                    </div>
+                </div>
+
+                <div class="widgets-grid">
+                    <div class="widget">
+                        <div class="widget-header">
+                            <h3 class="widget-title">Recommended Providers</h3>
+                            <div class="widget-icon">
+                                <i class="fas fa-star"></i>
+                            </div>
+                        </div>
+                        <p style="color: var(--text-light); padding: 1rem 0;">No recommendations at this time.</p>
+                    </div>
+
+                    <div class="widget">
+                        <div class="widget-header">
+                            <h3 class="widget-title">My Upcoming Jobs</h3>
+                            <div class="widget-icon">
+                                <i class="fas fa-calendar-check"></i>
+                            </div>
+                        </div>
+                        <p style="color: var(--text-light); padding: 1rem 0;">You have no upcoming jobs.</p>
+                    </div>
+
+                    <div class="widget">
+                         <div class="widget-header">
+                            <h3 class="widget-title">Past Services & Ratings</h3>
+                            <div class="widget-icon">
+                                <i class="fas fa-history"></i>
+                            </div>
+                        </div>
+                        <p style="color: var(--text-light); padding: 1rem 0;">No past services found.</p>
+                    </div>
+
+                    <div class="widget">
+                        <div class="widget-header">
+                            <h3 class="widget-title">Community Updates</h3>
+                            <div class="widget-icon">
+                                <i class="fas fa-newspaper"></i>
+                            </div>
+                        </div>
+                        <p style="color: var(--text-light); padding: 1rem 0;">No community updates right now.</p>
+                    </div>
+                </div>
+            </div>
+
+            </main>
+    </div>
+
+    <script>
+        // --- COPIED FROM SCRIPT.JS ---
+        // 6) Theme Toggle
+        function initThemeToggle() {
+            const themeToggle = document.querySelector('.theme-toggle');
+            if (themeToggle) {
+                // Apply saved theme on page load
+                if (localStorage.getItem('theme') === 'dark') {
+                    document.body.classList.add('dark-mode');
+                    themeToggle.innerHTML = '<i class="fa-solid fa-sun"></i>';
+                }
+
+                themeToggle.addEventListener('click', () => {
+                    document.body.classList.toggle('dark-mode');
+                    let theme = 'light';
+                    if (document.body.classList.contains('dark-mode')) {
+                        theme = 'dark';
+                        themeToggle.innerHTML = '<i class="fa-solid fa-sun"></i>';
+                    } else {
+                        themeToggle.innerHTML = '<i class="fa-solid fa-moon"></i>';
+                    }
+                    localStorage.setItem('theme', theme);
+                });
+            }
+        }
+        // --- END OF COPY ---
+
+        // --- ADDED: Search Functionality for Dashboard ---
+        function initDashboardSearch() {
+            // 1. Select the single search input from the dashboard header
+            const searchInput = document.querySelector('#dashboard-search-input');
+
+            // 2. If it doesn't exist, do nothing.
+            if (!searchInput) return;
+
+            // 3. Define the search action
+            const performSearch = () => {
+                const term = searchInput.value.trim();
+                
+                // Location is not part of this search bar, so pass it as empty
+                const loc = ''; 
+                
+                // 4. Redirect to the all-services page with query parameters
+                //    (Assuming all-services.html is the correct target)
+                window.location.href = `all-services.html?q=${encodeURIComponent(term)}&loc=${encodeURIComponent(loc)}`;
+            };
+
+            // 5. Add listener for the "Enter" key
+            searchInput.addEventListener('keypress', (e) => {
+                if (e.key === 'Enter') {
+                    performSearch();
+                }
+            });
+        }
+        // --- END OF ADDED FUNCTION ---
+
+
+        // Run all scripts on page load
+        document.addEventListener('DOMContentLoaded', () => {
+            
+            // Initialize theme toggle
+            initThemeToggle();
+
+            // Initialize dashboard search
+            initDashboardSearch();
+
+            // REMOVED: Old navigation tab-switching script
+            
+            // Mobile sidebar toggle
+            function toggleSidebar() {
+                document.querySelector('.sidebar').classList.toggle('open');
+            }
+
+            // Add mobile menu button for smaller screens
+            if (window.innerWidth <= 768) {
+                const header = document.querySelector('.header');
+                const menuBtn = document.createElement('button');
+                menuBtn.innerHTML = '<i class="fas fa-bars"></i>';
+                menuBtn.style.cssText = 'background: none; border: none; font-size: 1.2rem; cursor: pointer; color: var(--text-color);';
+                menuBtn.onclick = toggleSidebar;
+                // UPDATED: Insert it at the beginning of the header
+                header.prepend(menuBtn);
+            }
+
+        });
+    </script>
+
+    <script type="module">
+        import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/12.4.0/firebase-auth.js";
+        import { doc, getDoc } from "https://www.gstatic.com/firebasejs/12.4.0/firebase-firestore.js";
+        import { auth, db } from './firebase-config.js';
+
+        document.addEventListener('DOMContentLoaded', () => {
+            onAuthStateChanged(auth, async (user) => {
+                if (user) {
+                    // User is signed in.
+                    const userId = user.uid;
+                    
+                    // Select UI elements
+                    const avatarImg = document.getElementById('sidebarUserAvatarImg');
+                    const userNameEl = document.getElementById('sidebarUserName');
+                    const userRoleEl = document.getElementById('sidebarUserRole');
+
+                    // 1. Try to load from localStorage first (for speed)
+                    let userName = localStorage.getItem('userName');
+                    let userRole = localStorage.getItem('userRole');
+                    let profileImageSrc = localStorage.getItem(`userProfileImage_${userId}`);
+
+                    // 2. If data is missing, fetch from Firestore
+                    if (!userName || !userRole) {
+                        console.log("Dashboard: User data not in localStorage, fetching from Firestore...");
+                        try {
+                            const userDocRef = doc(db, "users", userId);
+                            const userDocSnap = await getDoc(userDocRef);
+
+                            if (userDocSnap.exists()) {
+                                const data = userDocSnap.data();
+                                userName = data.fullName || 'Kasi User';
+                                userRole = data.role || 'Personal';
+                                
+                                // Save to localStorage for next time
+                                localStorage.setItem('userName', userName);
+                                localStorage.setItem('userRole', userRole);
+                            } else {
+                                console.warn("Dashboard: User document not found.");
+                                userName = 'Kasi User';
+                                userRole = 'Personal';
+                            }
+                        } catch (error) {
+                            console.error("Error fetching user data for dashboard:", error);
+                            userName = 'Kasi User';
+                            userRole = 'Personal';
+                        }
+                    }
+
+                    // 3. Update the UI
+                    if (userNameEl) {
+                        userNameEl.textContent = userName;
+                    }
+                    if (userRoleEl) {
+                        // We assume 'Client' is synonymous with the 'Personal' role
+                        userRoleEl.textContent = userRole === 'Personal' ? 'Client' : userRole;
+                    }
+                    if (avatarImg) {
+                        avatarImg.src = profileImageSrc || 'default-profile-picture.png';
+                    }
+
+                } else {
+                    // User is signed out. Redirect to login.
+                    console.log("No user signed in, redirecting to auth.html");
+                    window.location.href = 'auth.html';
+                }
+            });
+        });
+    </script>
+</body>
+</html>
